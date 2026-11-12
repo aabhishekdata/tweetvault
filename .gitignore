@@ -1,0 +1,35 @@
+node_modules/
+server/dev-vault.db*
+server/data/
+*.db
+*.db-wal
+*.db-shm
+*.db.before-*
+# secrets: any .env file anywhere (an example file is allowed), keys and certificates
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+# large design hand-offs and downloads
+*.zip
+deploy/reference-studio/
+
+# local machine files
+*.jks
+*.keystore
+server/media/
+data/
+
+# agent worktrees
+.claude/worktrees/
+
+# sync: the highest number sent to a phone, kept beside each database (sync.js)
+*.sync.json
+*.sync.json.tmp
+
+# local agent and editor settings
+.claude/

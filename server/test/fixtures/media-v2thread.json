@@ -1,0 +1,13 @@
+{"code":200,
+"status":{"type":"status","id":"1910000000000000001","url":"https://x.com/thread_author/status/1910000000000000001","text":"Thread start with a photo and a gif","author":{"screen_name":"thread_author","name":"Thread Author"},"created_timestamp":1760000100,"reposts":1,"likes":2,"replies":0,"views":10,"replying_to":null,
+ "media":{"all":[{"type":"photo","id":"m1","url":"https://pbs.twimg.com/media/THphotoA.jpg?name=orig"},{"type":"gif","id":"m2","url":"https://video.twimg.com/tweet_video/g.mp4","thumbnail_url":"https://pbs.twimg.com/tweet_video_thumb/gifthumb.jpg"}]}},
+"thread":[
+ {"type":"status","id":"1910000000000000001","url":"https://x.com/thread_author/status/1910000000000000001","text":"Thread start with a photo and a gif","author":{"screen_name":"thread_author","name":"Thread Author"},"created_timestamp":1760000100,"reposts":1,"likes":2,"replies":0,"views":10,"replying_to":null,
+  "media":{"all":[{"type":"photo","id":"m1","url":"https://pbs.twimg.com/media/THphotoA.jpg?name=orig"},{"type":"gif","id":"m2","url":"https://video.twimg.com/tweet_video/g.mp4","thumbnail_url":"https://pbs.twimg.com/tweet_video_thumb/gifthumb.jpg"}]}},
+ {"type":"status","id":"1910000000000000002","url":"https://x.com/thread_author/status/1910000000000000002","text":"Part two with a video","author":{"screen_name":"thread_author","name":"Thread Author"},"created_timestamp":1760000200,"reposts":0,"likes":1,"replies":0,"views":5,"replying_to":{"screen_name":"thread_author","status":"1910000000000000001"},
+  "media":{"all":[{"type":"video","id":"m3","url":"https://video.twimg.com/amplify_video/v.mp4","thumbnail_url":"https://pbs.twimg.com/amplify_video_thumb/3/img/vthumb.jpg"}],"videos":[{"type":"video","id":"m3","url":"https://video.twimg.com/amplify_video/v.mp4","thumbnail_url":"https://pbs.twimg.com/amplify_video_thumb/3/img/vthumb.jpg"}]}},
+ {"type":"status","id":"1910000000000000003","url":"https://x.com/thread_author/status/1910000000000000003","text":"Part three, a plain photo","author":{"screen_name":"thread_author","name":"Thread Author"},"created_timestamp":1760000300,"reposts":0,"likes":0,"replies":0,"views":3,"replying_to":{"screen_name":"thread_author","status":"1910000000000000002"},
+  "media":{"photos":[{"type":"photo","url":"https://pbs.twimg.com/media/THphotoC.png"}]}},
+ {"type":"status","id":"1910000000000000004","url":"https://x.com/other/status/1910000000000000004","text":"Someone else's reply with a photo","author":{"screen_name":"other","name":"Other"},"created_timestamp":1760000400,"reposts":0,"likes":0,"replies":0,"views":1,"replying_to":{"screen_name":"thread_author","status":"1910000000000000001"},
+  "media":{"photos":[{"type":"photo","url":"https://pbs.twimg.com/media/OTHER.jpg"}]}}
+]}

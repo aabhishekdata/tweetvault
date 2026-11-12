@@ -1,0 +1,38 @@
+# Tweet Vault on your server (~/tweet-vault). Public at https://vault.example.com via the host Nginx.
+services:
+  vault:
+    image: node:22-alpine
+    container_name: tweet-vault
+    restart: unless-stopped
+    user: "${VAULT_UID:-1000}:${VAULT_GID:-1000}"
+    working_dir: /app
+    command: ["node", "--disable-warning=ExperimentalWarning", "/app/src/server.js"]
+    env_file: .env
+    environment:
+      VAULT_DB: /data/vault.db
+      PORT: "8092"
+      VAULT_ORIGINS: https://vault.example.com
+      VAULT_TRUST_PROXY: "1"
+      NODE_ENV: production
+    volumes:
+      - ./server:/app:ro
+      - ./data:/data
+    ports:
+      - "127.0.0.1:8092:8092"
+    read_only: true
+    tmpfs:
+      - /tmp
+    # 512 MB cap. Voice notes need the headroom; lower it if you do not use them.
+    mem_limit: 512m
+    memswap_limit: 512m
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8092/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "3"

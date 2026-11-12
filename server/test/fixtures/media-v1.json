@@ -1,0 +1,14 @@
+{"code":200,"message":"OK","tweet":{"id":"1900000000000000001","url":"https://x.com/pic_author/status/1900000000000000001","text":"Two photos and a clip","author":{"screen_name":"pic_author","name":"Pic Author"},"created_timestamp":1760000000,"likes":5,"replies":1,"retweets":0,"views":100,"replying_to":null,"replying_to_status":null,
+"media":{"photos":[
+ {"type":"photo","url":"https://pbs.twimg.com/media/AAAphoto1.jpg","width":1200,"height":800},
+ {"type":"photo","url":"https://pbs.twimg.com/media/AAAphoto2.png?format=png&name=small","width":600,"height":400},
+ {"type":"photo","url":"https://pbs.twimg.com/media/AAAphoto1.jpg","width":1200,"height":800},
+ {"type":"photo","url":"https://evil.example.com/media/x.jpg"},
+ {"type":"photo","url":"http://pbs.twimg.com/media/plain.jpg"},
+ {"type":"photo","url":"https://pbs.twimg.com.evil.example/media/y.jpg"},
+ {"type":"photo","url":"https://user:pw@pbs.twimg.com/media/z.jpg"},
+ {"type":"photo","url":"https://pbs.twimg.com:8443/media/p.jpg"},
+ {"type":"photo","url":"javascript:alert(1)"},
+ {"type":"photo"}],
+"videos":[{"type":"video","url":"https://video.twimg.com/ext_tw_video/1/pu/vid/720x1280/clip.mp4","thumbnail_url":"https://pbs.twimg.com/ext_tw_video_thumb/1/pu/img/thumb1.jpg","duration":12.5}]},
+"quote":{"id":"1900000000000000099","text":"quoted","author":{"screen_name":"someone","name":"Someone"},"media":{"photos":[{"type":"photo","url":"https://pbs.twimg.com/media/QUOTED.jpg"}]}}}}

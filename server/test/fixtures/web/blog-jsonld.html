@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Notes on small databases</title>
+<meta property="og:site_name" content="Field Notes">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", "name": "Field Notes", "url": "https://fieldnotes.example/" },
+    {
+      "@type": "BlogPosting",
+      "headline": "Why I keep choosing SQLite",
+      "datePublished": "2025-11-02T10:00:00+01:00",
+      "author": { "@type": "Person", "name": "Jonas Berg" },
+      "publisher": { "@type": "Organization", "name": "Field Notes" },
+      "articleBody": "For most of my side projects the database is the part I think about least, and that is exactly why I keep choosing SQLite.\n\nIt is one file. Backups are a copy. There is no server to patch, no port to firewall and no connection pool to tune. When a project grows, the write-ahead log handles more concurrent readers than any of my projects has ever had.\n\nThe usual objection is that it does not scale. In practice the limit is a single writer at a time, and a single writer can do tens of thousands of small transactions a second on a cheap VPS. That is more than enough for anything with fewer than a few million users.\n\nThe one thing I do miss is a good story for running migrations from several processes at once, so I always take a lock before upgrading the schema."
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div id="app">
+  <div class="post">
+    <h1>Why I keep choosing SQLite</h1>
+    <p>For most of my side projects the database is the part I think about least.</p>
+  </div>
+</div>
+</body>
+</html>

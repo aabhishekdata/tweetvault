@@ -1,0 +1,25 @@
+{
+  "kind": "youtube#videoListResponse",
+  "etag": "abc",
+  "items": [
+    {
+      "kind": "youtube#video",
+      "etag": "def",
+      "id": "M7lc1UVf-VE",
+      "snippet": {
+        "publishedAt": "2013-04-10T17:00:15Z",
+        "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        "title": "YouTube Developers Live: Embedded Web Player Customization",
+        "description": "On this week's show, Jeff Posnick covers everything you need to know.\n\n00:00 Intro\n01:05 - Setting up the player\n04:30 autoplay and loop\n12:10 Questions from viewers\n\nLinks: https://developers.google.com/youtube/player_parameters",
+        "thumbnails": {"default": {"url": "https://i.ytimg.com/vi/M7lc1UVf-VE/default.jpg", "width": 120, "height": 90}},
+        "channelTitle": "Google for Developers",
+        "tags": ["youtube", "api"],
+        "categoryId": "28",
+        "liveBroadcastContent": "none",
+        "localized": {"title": "YouTube Developers Live: Embedded Web Player Customization", "description": "..."}
+      },
+      "contentDetails": {"duration": "PT22M24S", "dimension": "2d", "definition": "hd", "caption": "true", "licensedContent": false, "contentRating": {}, "projection": "rectangular"}
+    }
+  ],
+  "pageInfo": {"totalResults": 1, "resultsPerPage": 1}
+}
