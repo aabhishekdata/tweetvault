@@ -767,8 +767,7 @@
       h('div', { class: 'sidefoot' },
         h('div', { class: 'sidesep' }),
         navBtn({ on: state.tab === 'security' && !state.merge, ic: 'gear', tone: 'muted', label: 'Security', onclick: () => openView('security') }),
-        navBtn({ on: state.tab === 'recipes' && !state.merge, ic: 'note', tone: 'muted', label: 'Prompt recipes', onclick: () => openView('recipes') }),
-        navBtn({ on: false, ic: 'logout', tone: 'muted', label: 'Sign out', onclick: signOut })),
+        navBtn({ on: state.tab === 'recipes' && !state.merge, ic: 'note', tone: 'muted', label: 'Prompt recipes', onclick: () => openView('recipes') })),
     ].flat(Infinity).filter(Boolean));
   }
 
@@ -898,8 +897,6 @@
         h('span', { class: 'words' }, h('span', { class: 'name', text: 'Tweet Vault' }), h('span', { class: 'by', text: 'by The Tech Leverage' }))),
       h('div', { class: 'gsearch', role: 'search' }, icon('search'), h('label', { for: 'gq', class: 'sr', text: 'Search your vault' }), search),
       menuButton(h('button', { type: 'button', class: 'avatar', 'aria-label': 'Account', title: 'Account' }, icon('user')), () => [
-        { label: 'Security', icon: 'gear', onClick: () => openView('security') },
-        { label: 'Prompt recipes', icon: 'note', onClick: () => openView('recipes') },
         { label: 'Theme', icon: 'theme', sub: THEMES.map(([v, l]) => ({ label: l, on: themeChoice() === v, onClick: () => setTheme(v) })) },
         canTranslate() ? { label: 'Auto-translate', icon: 'refresh', sub: [['on', 'On: Chinese, Japanese and other scripts'], ['off', 'Off: translate on request']].map(([v, l]) => ({
           label: l, on: (autoTr() ? 'on' : 'off') === v,
@@ -1421,7 +1418,7 @@
         h('div', { class: 'rhead' },
           h('div', {}, itemMeta(x), trChip(x), h('h2', { id: `${id}-t`, text: title })),
           h('button', { type: 'button', class: 'ibtn', 'aria-label': 'Close', title: 'Close', onclick: () => finish(null) }, icon('x'))),
-        h('div', { class: 'rbody', tabindex: 0, 'aria-label': 'Full text' }, text),
+        h('div', { class: 'rbody', tabindex: 0, 'aria-label': 'Full text' }, mdView(text, null, { breaks: true })),
         h('div', { class: 'btnrow' },
           href ? h('a', { class: 'btn', href, target: '_blank', rel: 'noopener noreferrer' }, 'Open source', icon('ext', 'sm')) : null,
           h('button', { type: 'button', class: 'btn', onclick: () => copyText(text, 'text') }, icon('copy', 'sm'), 'Copy text'),
@@ -1924,7 +1921,7 @@
           ? h('button', { type: 'button', class: 'tlink', title: opensInReader(main) ? 'Read the article' : (full !== null ? 'Show less' : 'Show the full text'),
             'aria-expanded': opensInReader(main) ? null : String(full !== null), onclick: () => openInVault(main) }, title)
           : title) : null,
-        excerpt ? h('p', { class: `excerpt${full !== null ? ' full' : title ? ' clamp2' : ' clamp4'}`, text: excerpt }) : null,
+        excerpt ? h('p', { class: `excerpt${full !== null ? ' full' : title ? ' clamp2' : ' clamp4'}`, text: full === null && isWebArticle(main) ? unMd(excerpt) : excerpt }) : null,
         thumbs(main),
         videoLine(main),
         main.quote ? h('blockquote', { class: 'quote clamp2', text: `@${main.quote.handle || '?'}: ${main.quote.text}` }) : null,
@@ -2061,7 +2058,11 @@
     v.dirty = false;
     const key = focusKey();
     const n = state.groups.length;
-    v.head.count.textContent = plural(n, state.tab === 'inbox' ? 'conversation' : 'item');
+    // the sidebar counts items; the list groups them into conversations, so the header names both
+    const items = state.groups.reduce((a, g) => a + [g.root, ...g.thread, ...g.replies].filter((x) => x && !x.context).length, 0);
+    v.head.count.textContent = state.tab === 'inbox'
+      ? (items !== n ? `${plural(n, 'conversation')} · ${plural(items, 'item')}` : plural(n, 'conversation'))
+      : plural(n, 'item');
     const sel = [...state.selected].sort((a, b) => a - b);
     const toolSig = JSON.stringify([sel, state.selecting, state.tab, state.filter, state.sort, state.groups.flatMap(allIds), n,
       state.org.categories, state.org.tags, state.bundles.map((b) => [b.slug, b.title, b.items])]);
@@ -2500,6 +2501,19 @@
       ? h('label', { class: 'switch', for: 'eng' }, 'In English', englishSw, h('span', { class: 'track', 'aria-hidden': 'true' }))
       : null;
     showSrc.addEventListener('change', () => { if (m.rendered) pre.textContent = withSources() ? m.rendered.text_sources : m.rendered.text; });
+    // The preview reads as a page; "Plain text" shows exactly what Copy puts on the clipboard.
+    const fmt = h('div', { class: 'reading fmt', tabindex: 0, 'aria-label': 'Reading preview' });
+    const plainSw = h('input', { type: 'checkbox', id: 'plain', role: 'switch', checked: store.get('tv.preview') === 'plain' });
+    const paintPreview = () => {
+      const plain = plainSw.checked;
+      pre.hidden = !plain;
+      fmt.hidden = plain;
+      fmt.classList.toggle('stale', pre.classList.contains('stale'));
+      if (!plain) clear(fmt).append(mdView(pre.textContent, null, { breaks: true }));
+    };
+    new MutationObserver(paintPreview).observe(pre, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    plainSw.addEventListener('change', () => { store.set('tv.preview', plainSw.checked ? 'plain' : 'formatted'); paintPreview(); });
+    paintPreview();
     const refresh = () => refreshPreview(m, pre, withSources);
 
     // title + save status
@@ -2629,7 +2643,7 @@
         }
         for (const x of g.fixed) {
           k += 1;
-          const t = x.kind === 'article' ? (x.title || 'Article') : (x.preview || '').replace(/\s+/g, ' ').slice(0, 160);
+          const t = x.kind === 'article' ? (x.title || 'Article') : (isWebArticle(x) ? unMd(x.preview) : (x.preview || '')).replace(/\s+/g, ' ').slice(0, 160);
           part.append(h('div', { class: 'src' },
             h('span', { class: 'num', 'aria-hidden': 'true', text: pad(k) }),
             h('div', {}, h('div', { class: 'stitle', text: t || kindName(x) }),
@@ -2712,8 +2726,9 @@
         h('div', { class: 'readpane' },
           h('div', { class: 'pane-h' }, h('h2', { text: 'Reading preview' }), h('span', { class: 'grow' }),
             englishLabel,
-            h('label', { class: 'switch', for: 'src' }, 'Show sources', showSrc, h('span', { class: 'track', 'aria-hidden': 'true' }))),
-          pre)));
+            h('label', { class: 'switch', for: 'src' }, 'Show sources', showSrc, h('span', { class: 'track', 'aria-hidden': 'true' })),
+            h('label', { class: 'switch', for: 'plain' }, 'Plain text', plainSw, h('span', { class: 'track', 'aria-hidden': 'true' }))),
+          pre, fmt)));
     draw();
     // reloaded with "In English" kept on (Add items): translate what was just added before the first preview
     if (m.english && canTranslate()) translatePending(m, foreign, englishSw, pre).then((ok) => { if (ok) refresh(); });
@@ -2792,8 +2807,7 @@
           h('h3', { class: 'ititle' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); openBundleFromClick(b.slug); }, text: b.title })),
           h('div', { class: 'meta' }, meta.map((x, i) => [i ? dot() : null, x])),
           h('p', { class: 'excerpt small muted' }, 'Name for Claude: ', h('code', { text: b.slug }),
-            (b.tags || []).length ? ` · ${b.tags.map((t) => `#${t}`).join(' ')}` : ''),
-          h('div', { class: 'foot' }, h('button', { type: 'button', class: 'tbtn', onclick: () => openBundleFromClick(b.slug) }, 'Open collection', icon('right', 'sm')))),
+            (b.tags || []).length ? ` · ${b.tags.map((t) => `#${t}`).join(' ')}` : '')),
         moreBtn(b.title, () => [
           { label: 'Open collection', icon: 'layers', tone: 'blue', onClick: () => openBundle(b.slug) },
           { label: 'Copy text', icon: 'copy', onClick: () => exp(b, false) },
@@ -3269,27 +3283,41 @@
     if (last < text.length) out.push(inlineMd(text.slice(last)));
     return out;
   }
-  // **bold**, *italic* and `code`, as elements (never innerHTML)
+  // **bold**, *italic*, `code` and [text](https://link), as elements (never innerHTML)
   function inlineMd(s) {
     const out = [];
-    const re = /(\*\*[^*]+\*\*|`[^`]+`|\*[^*\s][^*]*\*)/g;
+    const re = /(\[[^\]\n]+\]\(https?:\/\/[^)\s]+\)|\*\*[^*]+\*\*|`[^`]+`|\*[^*\s][^*]*\*)/g;
     let last = 0;
     for (const m of s.matchAll(re)) {
       if (m.index > last) out.push(s.slice(last, m.index));
       const t = m[0];
+      if (t.startsWith('[')) {
+        const cut = t.lastIndexOf('](');
+        out.push(h('a', { href: t.slice(cut + 2, -1), target: '_blank', rel: 'noopener noreferrer' }, inlineMd(t.slice(1, cut))));
+        last = m.index + t.length;
+        continue;
+      }
       out.push(t.startsWith('**') ? h('strong', { text: t.slice(2, -2) }) : t.startsWith('`') ? h('code', { text: t.slice(1, -1) }) : h('em', { text: t.slice(1, -1) }));
       last = m.index + t.length;
     }
     if (last < s.length) out.push(s.slice(last));
     return out;
   }
+  // Markdown marks taken out of a one-line excerpt, so a card never shows **, [text](url) or table bars.
+  const unMd = (s) => String(s || '').replace(/\[([^\]\n]+)\]\(https?:\/\/[^)\s]+\)/g, '$1').replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/(^|\s)\*([^*\s][^*]*)\*(?=[\s.,;:!?)]|$)/g, '$1$2').replace(/^(\s*\|)+\s*/gm, '').replace(/^#{1,6}\s+/gm, '').replace(/^\*(?=\S)/, '');
   // A small Markdown reader for notes and passes: headings, bullet and numbered lists, checkboxes, quotes,
-  // paragraphs. Built with elements and text nodes only.
-  function mdView(md, seek) {
+  // paragraphs. Built with elements and text nodes only. breaks: keep single line breaks (posts and
+  // merged text are written line by line; notes from Claude are not).
+  function mdView(md, seek, { breaks = false } = {}) {
     const root = h('div', { class: 'vn-md' });
     let list = null;
     let para = [];
-    const flush = () => { if (para.length) { root.append(h('p', {}, withMarks(para.join(' '), seek))); para = []; } };
+    const flush = () => {
+      if (!para.length) return;
+      root.append(h('p', {}, breaks ? para.map((l, i) => [i ? h('br') : null, withMarks(l, seek)]) : withMarks(para.join(' '), seek)));
+      para = [];
+    };
     for (const raw of String(md || '').split('\n')) {
       const line = raw.replace(/\s+$/, '');
       let m;

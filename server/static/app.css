@@ -537,7 +537,8 @@ button.chip:hover { text-decoration: underline; }
 
 /* collection cards */
 .bcard { display: grid; grid-template-columns: auto 1fr auto; gap: 0 16px; }
-.bcard .foot { display: flex; justify-content: flex-end; margin-top: 4px; }
+.bcard .ititle a { color: var(--blue); }
+.bcard .ititle a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .catmark { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
 .srcs { color: var(--teal-text); }
 
@@ -627,6 +628,14 @@ button.chip:hover { text-decoration: underline; }
   max-height: calc(100vh - var(--header-h) - 150px); overflow: auto;
 }
 .reading.stale { color: var(--muted); }
+.reading.fmt, dialog.dlg.reader .rbody { white-space: normal; }
+.reading .vn-md > :first-child, .rbody .vn-md > :first-child { margin-top: 0; }
+.reading .vn-md h3, .rbody .vn-md h3 { font-size: 20px; line-height: 28px; font-weight: 400; margin: 28px 0 8px; }
+.reading .vn-md h2 + p, .reading .vn-md h3 + p { margin-top: 0; }
+.reading .vn-md h4, .rbody .vn-md h4 { font-size: 16px; line-height: 24px; font-weight: 500; color: var(--muted); margin: 20px 0 4px; }
+.reading .vn-md p, .rbody .vn-md p { margin: 0 0 14px; }
+.reading .vn-md blockquote { border-left-color: var(--teal); background: var(--teal-soft); padding: 6px 12px; border-radius: 0 var(--r-chip) var(--r-chip) 0; color: var(--ink); }
+.pane-h .switch + .switch { margin-left: 4px; }
 .save-state { font-size: 13px; }
 .chip.saving { background: var(--neutral-soft); color: var(--muted); }
 
@@ -789,9 +798,12 @@ dialog.dlg.picker .btnrow { margin-top: 16px; }
   .fpanel .sel { width: 100%; }
   dialog.dlg .dlgbody { padding: 20px; }
   dialog.dlg .btnrow .btn { flex: 1 1 auto; }
-  .selbar { gap: 8px 12px; padding: 8px 12px; }
+  .tools.stick { position: fixed; top: auto; left: 0; right: 0; bottom: 0; z-index: 40; }
+  .selbar { gap: 8px 12px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); margin: 0; border-radius: 0; border-width: 1px 0 0; box-shadow: 0 -6px 20px rgba(22, 32, 42, 0.10); }
   .selbar .btn { flex: 1 1 auto; padding: 0 12px; }
   .selbar .grow { flex-basis: 100%; height: 0; }
+  .page:has(.tools.stick) { padding-bottom: 200px; }
+  body:has(.tools.stick) #toast { bottom: 150px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }

@@ -552,8 +552,8 @@ describe('page: Copy with… and the Prompt recipes page', () => {
     assert.deepEqual(copied, [['TEXT', 'with “Outline”']]);
   });
 
-  test('the page is wired in: Account menu and sidebar entries next to Security, a route, the help line', () => {
-    assert.match(APP, /\{ label: 'Security', icon: 'gear', onClick: \(\) => openView\('security'\) \},\n\s+\{ label: 'Prompt recipes', icon: 'note', onClick: \(\) => openView\('recipes'\) \},/);
+  test('the page is wired in: a sidebar entry next to Security (its one home, not also the Account menu), a route, the help line', () => {
+    assert.doesNotMatch(APP, /\{ label: 'Prompt recipes', icon: 'note', onClick: \(\) => openView\('recipes'\) \}/);
     assert.match(APP, /label: 'Prompt recipes', onclick: \(\) => openView\('recipes'\)/);
     assert.match(APP, /if \(state\.tab === 'recipes'\) return await renderRecipes\(\);/);
     assert.ok(APP.includes("Use {{title}} to insert the collection\\'s title."));
