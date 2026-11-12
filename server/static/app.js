@@ -50,6 +50,7 @@
     chevdown: ['M6.5 9.5 12 15l5.5-5.5'],
     chevup: ['M6.5 14.5 12 9l5.5 5.5'],
     left: ['M19 12H5.5', 'M11 6l-6 6 6 6'],
+    right: ['M5 12h13.5', 'M13 6l6 6-6 6'],
     copy: ['M9.5 8.5h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z', 'M15.5 8.5V4.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3'],
     pencil: ['M15.5 4.5l4 4L8.5 19.5H4.5v-4z', 'M13 7l4 4'],
     check: ['M5 12.5l4.5 4.5L19 7.5'],
@@ -822,6 +823,9 @@
   // sidebar: expanded/hidden on desktop (remembered), an overlay drawer below 800px
   const mobileQ = window.matchMedia('(max-width: 800px)');
   const isMobile = () => mobileQ.matches;
+  // a phone-width header has room for one word in the search box
+  const narrowQ = window.matchMedia('(max-width: 520px)');
+  narrowQ.addEventListener('change', () => { if (state.shell) state.shell.search.placeholder = narrowQ.matches ? 'Search' : 'Search your vault'; });
   function syncBurger() {
     const s = state.shell;
     if (!s) return;
@@ -871,7 +875,7 @@
   function buildShell() {
     clear(app);
     const burger = h('button', { type: 'button', class: 'ibtn burger', 'aria-controls': 'primary-sidebar', onclick: toggleSidebar }, icon('menu'));
-    const search = h('input', { type: 'search', id: 'gq', placeholder: 'Search your vault', value: state.q, autocomplete: 'off' });
+    const search = h('input', { type: 'search', id: 'gq', placeholder: narrowQ.matches ? 'Search' : 'Search your vault', value: state.q, autocomplete: 'off' });
     let deb = null;
     search.addEventListener('input', () => {
       clearTimeout(deb);
@@ -908,10 +912,11 @@
     // a click on a nav item closes the mobile drawer
     side.addEventListener('click', (e) => { if (e.target.closest('.navbtn') && isMobile()) closeDrawer(false); });
     const inner = h('div', { class: 'inner' });
-    const main = h('main', { class: 'page', id: 'main' }, inner);
+    const main = h('main', { class: 'page', id: 'main', tabindex: '-1' }, inner);
     const layout = h('div', { class: `layout${store.get('tv.sidebar') === 'hidden' ? ' collapsed' : ''}` },
       side, h('div', { class: 'backdrop', onclick: () => closeDrawer() }), main);
-    app.append(header, layout);
+    const skip = h('a', { class: 'skip', href: '#main', text: 'Skip to content', onclick: (e) => { e.preventDefault(); main.focus(); } });
+    app.append(skip, header, layout);
     state.shell = { header, side, main, inner, layout, burger, search };
     syncBurger();
     lastOrg = '';
@@ -1941,7 +1946,7 @@
     let cap = null;
     if (state.tab === 'trashed') main.append(h('p', { class: 'notice' }, icon('trash'), 'Items in Trash are deleted for good 30 days after you trash them. Move one to the Inbox to keep it.'));
     if (state.tab === 'inbox' && !scoped()) { cap = captureBox(); main.append(cap.el); }
-    const tools = h('div');
+    const tools = h('div', { class: 'tools' });
     const panel = h('div');
     const list = h('div', { class: 'cards' });
     // one lasting live region, so selection changes are announced
@@ -1954,6 +1959,7 @@
   function drawTools(v) {
     clear(v.tools);
     clear(v.panel);
+    v.tools.classList.toggle('stick', !!state.selecting);
     const every = state.groups.flatMap(allIds);
     if (state.selecting) {
       const n = state.selected.size;
@@ -2008,7 +2014,6 @@
       return;
     }
     if (v.cap) v.cap.btn.classList.add('primary');
-    const countText = plural(state.groups.length, 'conversation');
     const selBtn = every.length ? h('button', { type: 'button', class: 'tbtn', text: 'Select items', 'data-fkey': 'selitems', onclick: () => { state.selecting = true; renderInbox(true); } }) : null;
     const sort = sortSelect(SORTS, state.sort, (val) => { state.sort = val; go({}); });
     if (scoped()) {
@@ -2017,7 +2022,7 @@
     } else {
       const chips = appliedChips();
       v.tools.append(h('div', { class: 'ltool' },
-        state.tab === 'inbox' ? h('h2', { text: 'Your saves' }) : null, state.tab === 'inbox' ? h('span', { class: 'scount', text: countText }) : null,
+        state.tab === 'inbox' ? h('h2', { text: 'Your saves' }) : null,
         ...chips, h('span', { class: 'grow' }), selBtn, filtersToggle(), sort));
     }
     v.panel.append(filtersPanel());
@@ -2788,7 +2793,7 @@
           h('div', { class: 'meta' }, meta.map((x, i) => [i ? dot() : null, x])),
           h('p', { class: 'excerpt small muted' }, 'Name for Claude: ', h('code', { text: b.slug }),
             (b.tags || []).length ? ` · ${b.tags.map((t) => `#${t}`).join(' ')}` : ''),
-          h('div', { class: 'foot' }, h('button', { type: 'button', class: 'tbtn', onclick: () => openBundleFromClick(b.slug) }, 'Open collection', icon('ext', 'sm')))),
+          h('div', { class: 'foot' }, h('button', { type: 'button', class: 'tbtn', onclick: () => openBundleFromClick(b.slug) }, 'Open collection', icon('right', 'sm')))),
         moreBtn(b.title, () => [
           { label: 'Open collection', icon: 'layers', tone: 'blue', onClick: () => openBundle(b.slug) },
           { label: 'Copy text', icon: 'copy', onClick: () => exp(b, false) },
@@ -3007,7 +3012,7 @@
       h('div', { class: 'btnrow' }, h('button', { type: 'submit', class: 'btn primary' }, icon('plus', 'sm'), 'Add recipe')));
 
     main.append(h('div', { class: 'phead' }, h('h1', { text: 'Prompt recipes' }), h('span', { class: 'scount', text: plural(list.length, 'recipe') })),
-      h('p', { class: 'psub', text: 'Instructions to copy along with a collection. In a collection, choose Copy with… and pick one.' }),
+      h('p', { class: 'psub', text: 'Instructions that go with a collection when you choose Copy with….' }),
       h('p', { class: 'dhint rhelp', id: 'rc-help', text: 'Use {{title}} to insert the collection\'s title. Changes save by themselves.' }),
       h('div', { class: 'recipes' }, list.length ? list.map(card) : h('p', { class: 'muted', text: 'No recipes yet. Add one below.' }), addForm));
     if (focusKeys) focusFirst(focusKeys);
@@ -3142,7 +3147,7 @@
     const keyErr = h('p', { class: 'err', id: 'keyerr', role: 'alert' });
     const keyOut = h('div');
     const keyBtn = h('button', { type: 'submit', class: 'btn' }, icon('key', 'sm'), 'Create key');
-    const claude = accordion('claude', 'Connect Claude', h('span', { class: 'chip gold', text: 'Read only' }),
+    const claude = accordion('claude', 'Connect Claude', h('span', { class: 'chip', text: 'Read only' }),
       h('p', { class: 'lead', text: 'Let Claude read your collections and saved items directly, without SSH. It can only read: it cannot save, change or delete anything. For Claude Code, make a key here. For claude.ai, add a custom connector (below).' }),
       h('form', { onsubmit: async (e) => {
         e.preventDefault();
@@ -3218,7 +3223,7 @@
         : h('p', { class: 'muted', text: 'None.' }));
 
     // activity
-    const activity = accordion('activity', 'Recent activity', h('span', { class: 'chip gold', text: 'Last 30 days' }),
+    const activity = accordion('activity', 'Recent activity', h('span', { class: 'chip', text: 'Last 30 days' }),
       au.events.length ? h('ul', { class: 'loglist' }, au.events.map((e) => h('li', { class: e.ok ? '' : 'bad' },
         h('span', { class: 'muted', title: when(e.at), text: ago(e.at) }),
         h('span', { class: 'what' }, e.ok ? null : h('span', { class: 'sr', text: 'Failed: ' }), EVENT_TEXT[e.event] || e.event),
@@ -3226,7 +3231,7 @@
         : h('p', { class: 'muted', text: 'Nothing yet.' }));
 
     main.append(h('div', { class: 'phead' }, h('h1', { text: 'Security' })),
-      h('p', { class: 'psub', text: 'Manage sign-in and connected devices.' }),
+      h('p', { class: 'psub', text: 'Sign-in, phones, Claude and recent activity.' }),
       mfa, phones, claude, browsers, activity);
   }
 
@@ -3554,12 +3559,12 @@
       return;
     }
     if (!rec.on) {
-      const title = h('input', { type: 'text', id: 'vn-title', maxlength: 200, placeholder: 'Title (optional: the notes give it one)', autocomplete: 'off' });
+      const title = h('input', { type: 'text', id: 'vn-title', maxlength: 200, placeholder: 'Title (optional)', autocomplete: 'off' });
       box.append(
         h('div', { class: 'vn-recrow' },
           h('button', { type: 'button', class: 'btn primary vn-recbtn', onclick: () => startRecording(title.value.trim()) }, icon('mic', 'sm'), 'Record'),
           h('label', { for: 'vn-title', class: 'sr', text: 'Title' }), title),
-        h('p', { class: 'small muted', text: 'Up to 90 minutes. The title is optional. The audio is kept at 16 kbps (about 11 MB for 90 minutes) and backed up with the vault.' }));
+        h('p', { class: 'small muted', text: 'Up to 90 minutes. The recording is backed up with your vault.' }));
       return;
     }
     box.append(h('div', { class: 'vn-recrow live' },
@@ -3588,7 +3593,7 @@
       const info = h('div');
       const pending = h('div');
       const list = h('div', { class: 'cards' });
-      main.append(head.el, h('p', { class: 'psub', text: 'Talk it through. You get a transcript, detailed notes, action items and decisions, and you can run your own prompts on it.' }),
+      main.append(head.el, h('p', { class: 'psub', text: 'Talk it through. You get back a transcript, notes, action items and decisions.' }),
         recBox, pending, info, list);
       v = state.view = { kind: 'voice', head, list, info, pending };
       paintRecorder();
